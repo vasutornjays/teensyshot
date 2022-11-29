@@ -15,7 +15,6 @@
 /*
  *  Constants
  */
-
 #if defined(__IMXRT1062__) // teensy 4.0
   #define F_TMR F_BUS_ACTUAL
 #else // teensy 3.5
@@ -48,61 +47,130 @@ const uint16_t DSHOT_bit_length   = uint64_t(F_TMR) * DSHOT_BT_DURATION / 100000
 // Number of initialized DSHOT outputs
 uint8_t             DSHOT_n;
 
-#if defined(__IMXRT1062__) // teensy 4.0
+#if(defined(__IMXRT1062__)) // teensy 4.0
+  #if(defined(ARDUINO_TEENSY41)) // teensy 4.1
+  // DMA eFlexPWM modules
+  volatile IMXRT_FLEXPWM_t  *DSHOT_mods[DSHOT_NB_DMA_CHAN]  = { &IMXRT_FLEXPWM2, 
+                                                                &IMXRT_FLEXPWM1,  
+                                                                &IMXRT_FLEXPWM2,  
+                                                                &IMXRT_FLEXPWM4,  
+                                                                &IMXRT_FLEXPWM4,
+                                                                &IMXRT_FLEXPWM1,
+                                                                &IMXRT_FLEXPWM4,
+                                                                &IMXRT_FLEXPWM2
+                                                              };
 
-// DMA eFlexPWM modules
-volatile IMXRT_FLEXPWM_t  *DSHOT_mods[DSHOT_NB_DMA_CHAN]  = { &IMXRT_FLEXPWM2, 
-                                                              &IMXRT_FLEXPWM1,  
-                                                              &IMXRT_FLEXPWM1,  
-                                                              &IMXRT_FLEXPWM4,  
-                                                              &IMXRT_FLEXPWM4, 
-                                                              &IMXRT_FLEXPWM2
-                                                            };
+  // DMA eFlexPWM submodules
+  volatile uint8_t          DSHOT_sm[DSHOT_NB_DMA_CHAN]     = { 0, 
+                                                                3, 
+                                                                2, 
+                                                                0, 
+                                                                1, 
+                                                                2,
+                                                                2,
+                                                                3
+                                                              };
 
-// DMA eFlexPWM submodules
-volatile uint8_t          DSHOT_sm[DSHOT_NB_DMA_CHAN]     = { 0, 
-                                                              3, 
-                                                              2, 
-                                                              0, 
-                                                              1, 
-                                                              2
-                                                            };
+  // DMA eFlexPWM submodule PWM channel selector: A=0, B=1, X=2
+  volatile uint8_t  	      DSHOT_abx[DSHOT_NB_DMA_CHAN]    = { 0, 
+                                                                0, 
+                                                                1, 
+                                                                0, 
+                                                                0, 
+                                                                2,
+                                                                0,
+                                                                0
+                                                              };
 
-// DMA eFlexPWM submodule PWM channel selector: A=0, B=1, X=2
-volatile uint8_t  	      DSHOT_abx[DSHOT_NB_DMA_CHAN]    = { 0, 
-                                                              0, 
-                                                              2, 
-                                                              0, 
-                                                              0, 
-                                                              1
-                                                            };
+  // Output pins
+  volatile uint8_t          DSHOT_pin[DSHOT_NB_DMA_CHAN]    = { 4, 
+                                                                8,
+                                                                9,
+                                                                22, 
+                                                                23, 
+                                                                24, 
+                                                                2,
+                                                                36
+                                                              };
 
-// Output pins
-volatile uint8_t          DSHOT_pin[DSHOT_NB_DMA_CHAN]    = { 4, 
-                                                              8, 
-                                                              24, 
-                                                              22, 
-                                                              23, 
-                                                              9
-                                                            };
+  // Output pin ALT mux
+  volatile uint8_t          DSHOT_pinmux[DSHOT_NB_DMA_CHAN] = { 1, 
+                                                                6, 
+                                                                2, 
+                                                                1, 
+                                                                1, 
+                                                                4,
+                                                                1,
+                                                                6
+                                                              };
 
-// Output pin ALT mux
-volatile uint8_t          DSHOT_pinmux[DSHOT_NB_DMA_CHAN] = { 1, 
-                                                              6, 
-                                                              4, 
-                                                              1, 
-                                                              1, 
-                                                              2
-                                                            };
+  // DMA source
+  volatile uint8_t          DSHOT_dmamux[DSHOT_NB_DMA_CHAN] = { DMAMUX_SOURCE_FLEXPWM2_WRITE0,
+                                                                DMAMUX_SOURCE_FLEXPWM1_WRITE3,
+                                                                DMAMUX_SOURCE_FLEXPWM2_WRITE2,
+                                                                DMAMUX_SOURCE_FLEXPWM4_WRITE0,
+                                                                DMAMUX_SOURCE_FLEXPWM4_WRITE1,
+                                                                DMAMUX_SOURCE_FLEXPWM1_WRITE2,
+                                                                DMAMUX_SOURCE_FLEXPWM4_WRITE2,
+                                                                DMAMUX_SOURCE_FLEXPWM2_WRITE3
+                                                              };
 
-// DMA source
-volatile uint8_t          DSHOT_dmamux[DSHOT_NB_DMA_CHAN] = { DMAMUX_SOURCE_FLEXPWM2_WRITE0,
-                                                              DMAMUX_SOURCE_FLEXPWM1_WRITE3,
-                                                              DMAMUX_SOURCE_FLEXPWM1_WRITE2,
-                                                              DMAMUX_SOURCE_FLEXPWM4_WRITE0,
-                                                              DMAMUX_SOURCE_FLEXPWM4_WRITE1,
-                                                              DMAMUX_SOURCE_FLEXPWM2_WRITE2
-                                                            };
+  #else
+
+  // DMA eFlexPWM modules
+  volatile IMXRT_FLEXPWM_t  *DSHOT_mods[DSHOT_NB_DMA_CHAN]  = { &IMXRT_FLEXPWM2, 
+                                                                &IMXRT_FLEXPWM1,  
+                                                                &IMXRT_FLEXPWM1,  
+                                                                &IMXRT_FLEXPWM4,  
+                                                                &IMXRT_FLEXPWM4, 
+                                                                &IMXRT_FLEXPWM2
+                                                              };
+
+  // DMA eFlexPWM submodules
+  volatile uint8_t          DSHOT_sm[DSHOT_NB_DMA_CHAN]     = { 0, 
+                                                                3, 
+                                                                2, 
+                                                                0, 
+                                                                1, 
+                                                                2
+                                                              };
+
+  // DMA eFlexPWM submodule PWM channel selector: A=0, B=1, X=2
+  volatile uint8_t  	      DSHOT_abx[DSHOT_NB_DMA_CHAN]    = { 0, 
+                                                                0, 
+                                                                2, 
+                                                                0, 
+                                                                0, 
+                                                                1
+                                                              };
+
+  // Output pins
+  volatile uint8_t          DSHOT_pin[DSHOT_NB_DMA_CHAN]    = { 4, 
+                                                                8, 
+                                                                24, 
+                                                                22, 
+                                                                23, 
+                                                                9
+                                                              };
+
+  // Output pin ALT mux
+  volatile uint8_t          DSHOT_pinmux[DSHOT_NB_DMA_CHAN] = { 1, 
+                                                                6, 
+                                                                4, 
+                                                                1, 
+                                                                1, 
+                                                                2
+                                                              };
+
+  // DMA source
+  volatile uint8_t          DSHOT_dmamux[DSHOT_NB_DMA_CHAN] = { DMAMUX_SOURCE_FLEXPWM2_WRITE0,
+                                                                DMAMUX_SOURCE_FLEXPWM1_WRITE3,
+                                                                DMAMUX_SOURCE_FLEXPWM1_WRITE2,
+                                                                DMAMUX_SOURCE_FLEXPWM4_WRITE0,
+                                                                DMAMUX_SOURCE_FLEXPWM4_WRITE1,
+                                                                DMAMUX_SOURCE_FLEXPWM2_WRITE2
+                                                              };
+  #endif
 
 #else // teensy 3.5
 
@@ -139,31 +207,57 @@ DMAChannel          dma[DSHOT_MAX_OUTPUTS];
 // DMA data
 volatile uint16_t   DSHOT_dma_data[DSHOT_MAX_OUTPUTS][DSHOT_DMA_LENGTH];
 
-#if defined(__IMXRT1062__) // teensy 4.0
+#if defined(__IMXRT1062__) // teensy 4.0 or 4.1
+  #if defined(ARDUINO_TEENSY41) // teensy 4.1
+    #define DSHOT_DMA_interrupt_routine( DSHOT_CHANNEL ) \
+    void DSHOT_DMA_interrupt_routine_ ## DSHOT_CHANNEL( void ) { \
+      dma[DSHOT_CHANNEL].clearInterrupt( ); \
+      (*DSHOT_mods[DSHOT_CHANNEL]).MCTRL &= FLEXPWM_MCTRL_RUN( 1 << DSHOT_sm[DSHOT_CHANNEL] );  \
+    }
 
-/* 
- * DMA termination interrupt service routine (ISR) for each DMA channel
- */
-#define DSHOT_DMA_interrupt_routine( DSHOT_CHANNEL ) \
-void DSHOT_DMA_interrupt_routine_ ## DSHOT_CHANNEL( void ) { \
-  dma[DSHOT_CHANNEL].clearInterrupt( ); \
-  (*DSHOT_mods[DSHOT_CHANNEL]).MCTRL &= FLEXPWM_MCTRL_RUN( 1 << DSHOT_sm[DSHOT_CHANNEL] );  \
-}
+    DSHOT_DMA_interrupt_routine( 0 );
+    DSHOT_DMA_interrupt_routine( 1 );
+    DSHOT_DMA_interrupt_routine( 2 );
+    DSHOT_DMA_interrupt_routine( 3 );
+    DSHOT_DMA_interrupt_routine( 4 );
+    DSHOT_DMA_interrupt_routine( 5 );
+    DSHOT_DMA_interrupt_routine( 6 );
+    DSHOT_DMA_interrupt_routine( 7 );
 
-DSHOT_DMA_interrupt_routine( 0 );
-DSHOT_DMA_interrupt_routine( 1 );
-DSHOT_DMA_interrupt_routine( 2 );
-DSHOT_DMA_interrupt_routine( 3 );
-DSHOT_DMA_interrupt_routine( 4 );
-DSHOT_DMA_interrupt_routine( 5 );
+    void (*DSHOT_DMA_ISR[8])()  = { DSHOT_DMA_interrupt_routine_0,
+                                    DSHOT_DMA_interrupt_routine_1,
+                                    DSHOT_DMA_interrupt_routine_2,
+                                    DSHOT_DMA_interrupt_routine_3,
+                                    DSHOT_DMA_interrupt_routine_4,
+                                    DSHOT_DMA_interrupt_routine_5,
+                                    DSHOT_DMA_interrupt_routine_6,
+                                    DSHOT_DMA_interrupt_routine_7,
+                                  };
+  #else
+    /* 
+    * DMA termination interrupt service routine (ISR) for each DMA channel
+    */
+    #define DSHOT_DMA_interrupt_routine( DSHOT_CHANNEL ) \
+    void DSHOT_DMA_interrupt_routine_ ## DSHOT_CHANNEL( void ) { \
+      dma[DSHOT_CHANNEL].clearInterrupt( ); \
+      (*DSHOT_mods[DSHOT_CHANNEL]).MCTRL &= FLEXPWM_MCTRL_RUN( 1 << DSHOT_sm[DSHOT_CHANNEL] );  \
+    }
 
-void (*DSHOT_DMA_ISR[6])()  = { DSHOT_DMA_interrupt_routine_0,
-                                DSHOT_DMA_interrupt_routine_1,
-                                DSHOT_DMA_interrupt_routine_2,
-                                DSHOT_DMA_interrupt_routine_3,
-                                DSHOT_DMA_interrupt_routine_4,
-                                DSHOT_DMA_interrupt_routine_5
-                              };
+    DSHOT_DMA_interrupt_routine( 0 );
+    DSHOT_DMA_interrupt_routine( 1 );
+    DSHOT_DMA_interrupt_routine( 2 );
+    DSHOT_DMA_interrupt_routine( 3 );
+    DSHOT_DMA_interrupt_routine( 4 );
+    DSHOT_DMA_interrupt_routine( 5 );
+
+    void (*DSHOT_DMA_ISR[6])()  = { DSHOT_DMA_interrupt_routine_0,
+                                    DSHOT_DMA_interrupt_routine_1,
+                                    DSHOT_DMA_interrupt_routine_2,
+                                    DSHOT_DMA_interrupt_routine_3,
+                                    DSHOT_DMA_interrupt_routine_4,
+                                    DSHOT_DMA_interrupt_routine_5
+                                  };
+  #endif
 
 #else // teensy 3.5
 
@@ -199,7 +293,7 @@ void DSHOT_init( int n ) {
     }
   }
 
-#if defined(__IMXRT1062__) // teensy 4.0
+#if defined(__IMXRT1062__) // teensy 4.0 and teensy 4.1
 
   // Configure pins on the board as DSHOT outputs
   // These pins are configured as eFlexPWM (FLEXPWMn) PWM outputs
@@ -373,9 +467,8 @@ int DSHOT_send( uint16_t *cmd, uint8_t *tlm ) {
   FTM0_SC = FTM_SC_CLKS(1);
 
 #endif
-
   // Wait the theoretical time needed by DMA + some margin
-  delayMicroseconds( (unsigned int)( ( DSHOT_BT_DURATION * ( DSHOT_DMA_LENGTH + DSHOT_DMA_MARGIN ) ) / 1000 ) );
+  delayMicroseconds( (unsigned int)( ( DSHOT_BT_DURATION * ( DSHOT_DMA_LENGTH ) ) / 1000 ) );
 
 #if !defined(__IMXRT1062__) // teensy 3.5
 

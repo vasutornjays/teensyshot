@@ -21,11 +21,7 @@ int   Host_get_fd(            uint32_t );
 int   Host_init_port(         uint32_t );
 void  Host_release_port(      uint32_t );
 int   Host_comm_update(       uint32_t, 
-                              int16_t*, 
-                              uint16_t*, 
-                              uint16_t*, 
-                              uint16_t*, 
-                              uint16_t*,
+                              int16_t*,
                               ESCPIDcomm_struct_t** );
 
 #endif

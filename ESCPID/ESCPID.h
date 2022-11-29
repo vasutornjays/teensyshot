@@ -7,8 +7,8 @@
 #define __ESCPID_H
 
 // Defines
-#define ESCPID_NB_ESC             2                 // Number of ESCs
-#define ESCPID_MAX_ESC            6                 // Max number of ESCs
+#define ESCPID_NB_ESC             8                 // Number of ESCs
+#define ESCPID_MAX_ESC            8                 // Max number of ESCs
 
 #define ESCPID_USB_UART_SPEED     115200            // Baudrate of the teeensy USB serial link
 
@@ -43,11 +43,7 @@ typedef struct {
 // sizeof(Host_comm)=64 to match USB 1.0 buffer size
 typedef struct {
   uint32_t      magic;                        // Magic number
-  int16_t       RPM_r[ESCPID_MAX_ESC];        // Velocity reference (10 rpm)
-  uint16_t      PID_P[ESCPID_MAX_ESC];        // PID proportional gain
-  uint16_t      PID_I[ESCPID_MAX_ESC];        // PID integral gain
-  uint16_t      PID_D[ESCPID_MAX_ESC];        // PID derivative gain
-  uint16_t      PID_f[ESCPID_MAX_ESC];        // PID filtering pole
+  int16_t       dshot[ESCPID_MAX_ESC];        // Velocity reference (10 rpm)
 } Hostcomm_struct_t;
 
 #endif

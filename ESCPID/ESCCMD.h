@@ -10,7 +10,13 @@
 
 // Defines
 #define ESCCMD_MAX_ESC          DSHOT_MAX_OUTPUTS // Max number of ESCs
-#define ESCCMD_NB_UART          6                 // Number of UARTS available
+
+#if(defined(__IMXRT1062__) && defined(ARDUINO_TEENSY41)) // teensy 4.1
+  #define ESCCMD_NB_UART          8                 // Number of UARTS available
+#else
+  #define ESCCMD_NB_UART          6                 // Number of UARTS available
+#endif
+
 #if ESCCMD_NB_UART < ESCCMD_MAX_ESC
   #error ESCCMD_NB_UART should be >= ESCCMD_MAX_ESC
 #endif
@@ -24,7 +30,7 @@
 #define ESCCMD_CMD_DELAY        50                // Delay between two consecutive DSHOT transmissions (us)
 #define ESCCMD_CMD_SAVE_DELAY   250000            // Minimum time to wait after a save command (us)
 
-#define ESCCMD_TIMER_PERIOD     2000              // Periodic loop period (us)
+#define ESCCMD_TIMER_PERIOD     2500              // Periodic loop period (us) => 0.01 sec or 100Hz for mainloop time 
 #define ESCCMD_ESC_WATCHDOG     250000            // ESC arming watchdog timer (us)
 #define ESCCMD_TIMER_MAX_MISS   ( ESCCMD_ESC_WATCHDOG / ESCCMD_TIMER_PERIOD )
                                                   // Maximum missed tics before watchdog is triggered

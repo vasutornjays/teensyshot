@@ -46,6 +46,19 @@ volatile uint8_t    ESCCMD_init_flag = 0;                   // Subsystem initial
 volatile uint8_t    ESCCMD_timer_flag = 0;                  // Periodic loop enable/disable flag
 
 IntervalTimer       ESCCMD_timer;                           // Timer object
+
+#if(defined(__IMXRT1062__) && defined(ARDUINO_TEENSY41)) // teensy 4.1
+HardwareSerial*     ESCCMD_serial[ESCCMD_NB_UART] = {       // Array of Serial objects
+                                                &Serial1,
+                                                &Serial2,
+                                                &Serial3,
+                                                &Serial4,
+                                                &Serial5,
+                                                &Serial6,
+                                                &Serial7,
+                                                &Serial8 };
+#else
+
 HardwareSerial*     ESCCMD_serial[ESCCMD_NB_UART] = {       // Array of Serial objects
                                                 &Serial1,
                                                 &Serial2,
@@ -53,6 +66,8 @@ HardwareSerial*     ESCCMD_serial[ESCCMD_NB_UART] = {       // Array of Serial o
                                                 &Serial4,
                                                 &Serial5,
                                                 &Serial6 };
+
+#endif
 uint8_t             ESCCMD_bufferTlm[ESCCMD_NB_UART][ESCCMD_TLM_LENGTH];
 
 #ifdef ESCCMD_ESC_EMULATION
@@ -443,7 +458,10 @@ int ESCCMD_throttle( uint8_t i, int16_t throttle ) {
     // 3D mode
     // 48 - 1047    : positive direction (48 slowest)
     // 1048 - 2047  : negative direction (1048 slowest)
-    if ( throttle >= 0 )
+    if (throttle == 0){
+      ESCCMD_cmd[i] = 0;
+    }
+    else if ( throttle > 0 )
       ESCCMD_cmd[i] = DSHOT_CMD_MAX + 1 + throttle;
     else
       ESCCMD_cmd[i] = DSHOT_CMD_MAX + 1 + ESCCMD_MAX_3D_THROTTLE - throttle;

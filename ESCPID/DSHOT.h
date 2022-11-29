@@ -7,14 +7,20 @@
 #define __DSHOT_H
 
 // Defines
-#define DSHOT_MAX_OUTPUTS         6             // Maximum number of DSHOT outputs on teensy 3.5
-#define DSHOT_NB_DMA_CHAN         6             // Number of accessible DMA channels
+#define DSHOT_NB_DMA_CHAN         8             // Number of accessible DMA channels
+
+#if ( defined(__IMXRT1062__) && defined(ARDUINO_TEENSY41) )
+   #define DSHOT_MAX_OUTPUTS         8             // Maximum number of DSHOT outputs on teensy 4.1
+ #else
+   #define DSHOT_MAX_OUTPUTS         6             // Maximum number of DSHOT outputs on teensy 3.5 and 4.0
+ #endif
+
 #if DSHOT_NB_DMA_CHAN < DSHOT_MAX_OUTPUTS
   #error ESCCMD_NB_UART should be >= DSHOT_MAX_OUTPUTS
 #endif
-#define DSHOT_DMA_LENGTH          18            // Number of steps of one DMA sequence (the two last values are zero)
-#define DSHOT_DMA_MARGIN          2             // Number of additional bit duration to wait until checking if DMA is over
-#define DSHOT_DSHOT_LENGTH        16            // Number of bits in a DSHOT sequence
+#define DSHOT_DMA_MARGIN          2                                    // Number of additional bit duration to wait until checking if DMA is over
+#define DSHOT_DSHOT_LENGTH        16                                      // Number of bits in a DSHOT sequence
+#define DSHOT_DMA_LENGTH          DSHOT_DMA_MARGIN + DSHOT_DSHOT_LENGTH   // Number of steps of one DMA sequence (the two last values are zero)
 #define DSHOT_BT_DURATION         1670          // Duration of 1 DSHOT600 bit in ns
 #define DSHOT_LP_DURATION         1250          // Duration of a DSHOT600 long pulse in ns
 #define DSHOT_SP_DURATION         625           // Duration of a DSHOT600 short pulse in ns
