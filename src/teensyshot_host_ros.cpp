@@ -5,6 +5,10 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "teensyshot_interfaces/msg/kiss_telemetry.hpp"
+#include "teensyshot_interfaces/msg/dshot_command.hpp"
+
+using std::placeholders::_1;
 
 
 extern "C" {
@@ -38,6 +42,9 @@ public:
 
     rclcpp::on_shutdown(std::bind(&TeensyshotNode::shutdown, this));
 
+    dshot_subscription_ = this->create_subscription<teensyshot_interfaces::msg::DshotCommand>(          // CHANGE
+      "/teensyshot/dshot_cmd", 10, std::bind(&TeensyshotNode::dshot_callback, this, _1));
+
     timer_ = this->create_wall_timer(
         10ms, std::bind(&TeensyshotNode::timer_callback, this));
   }
@@ -47,6 +54,15 @@ private:
   void shutdown() {
     RCLCPP_ERROR(this->get_logger(), "Shutdown Node");
     Host_release_port( HOST_DEV_SERIALNB );
+  }
+
+  void dshot_callback(const teensyshot_interfaces::msg::DshotCommand::SharedPtr msg)
+  {
+    for(int i; i < 8; i++)
+    {
+      this->dshot[i] = msg->dshot[i];
+      RCLCPP_INFO(this->get_logger(), "Dshot ch: '%d => '%d'", i, msg->dshot);   
+    }
   }
 
 
@@ -78,22 +94,23 @@ private:
 
     
     
-    // Update reference
-      for (int k = 0; k < NB_MAX_ESC; k++ ){
-        if (this->dshot[k] < 5 && this->dshot_state == 1){
-            this->dshot[k]++;
-        } else if (this->dshot[k] == 5 && this->dshot_state == 1) {
-            this->dshot_state = 0;
-        } else if (this->dshot[k] > -0 && this->dshot_state == 0) {
-            this->dshot[k]--;
-        } else if (this->dshot[k] == -0 && this->dshot_state == 0) {
-            this->dshot_state = 1;
-        } else {
-            this->dshot[k] = 0;
-        }
-      }
+    // // Update reference
+    //   for (int k = 0; k < NB_MAX_ESC; k++ ){
+    //     if (this->dshot[k] < 5 && this->dshot_state == 1){
+    //         this->dshot[k]++;
+    //     } else if (this->dshot[k] == 5 && this->dshot_state == 1) {
+    //         this->dshot_state = 0;
+    //     } else if (this->dshot[k] > -0 && this->dshot_state == 0) {
+    //         this->dshot[k]--;
+    //     } else if (this->dshot[k] == -0 && this->dshot_state == 0) {
+    //         this->dshot_state = 1;
+    //     } else {
+    //         this->dshot[k] = 0;
+    //     }
+    //   }
   }
   rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Subscription<teensyshot_interfaces::msg::DshotCommand>::SharedPtr dshot_subscription_;       // CHANGE
 
   int16_t dshot[NB_MAX_ESC];
   ESCPIDcomm_struct_t *comm;

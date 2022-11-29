@@ -21,6 +21,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} cmake/)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(teensyshot_interfaces REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -49,8 +50,9 @@ install(
   INCLUDES DESTINATION include
 )
 
+
 add_executable(teensyshot_host_ros src/teensyshot_host_ros.cpp)
-ament_target_dependencies(teensyshot_host_ros rclcpp std_msgs)
+ament_target_dependencies(teensyshot_host_ros rclcpp std_msgs teensyshot_interfaces)
 target_link_libraries(teensyshot_host_ros teensyshot)
 target_include_directories(teensyshot_host_ros PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

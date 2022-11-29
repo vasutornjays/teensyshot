@@ -25,7 +25,6 @@
 #endif
 #include "teensyshot/teensyshot_host_lib.h"
 
-
 #define HOST_MAX_DEVICES    5                       // Max number of teensys
 
 // Defines
