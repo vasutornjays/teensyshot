@@ -1,5 +1,5 @@
 # teensySHOT
-- DSHOT communication with ESC using Teensy 3.5 or Teensy 4.0 development boards
+- DSHOT communication with ESC using Teensy 3.5, Teensy 4.0, Teensy 4.1 development boards
 - DSHOT600 is generated using DMA
 - Telemetry is received through UART at 115200bps
 - Velocity PID control running at 500Hz is implemented for up to 6 motors
@@ -27,14 +27,16 @@ Data structure containing telemetry data, error code and last DSHOT command.
 ## Wiring
 teensySHOT can communicate with up to 6 ESCs. The following pins are to be used with the current version. It is possible to change some DSHOT pins using muxing options of the MCU (tutorial in progress). 
 <table>
-  <tr> <td>   </td> <td colspan="2">  Teensy 3.5 </td> <td colspan="2">  Teensy 4.0 </td> </tr>
-  <tr> <td>   </td> <td> DSHOT </td> <td> TLM/RX </td> <td> DSHOT </td> <td> TLM/RX </td> </tr>
-  <tr> <td> 1 </td> <td>   22  </td> <td>    0   </td> <td>   4   </td> <td>    0   </td> </tr>
-  <tr> <td> 2 </td> <td>   23  </td> <td>    9   </td> <td>   8   </td> <td>    7   </td> </tr>
-  <tr> <td> 3 </td> <td>    6  </td> <td>    7   </td> <td>  24   </td> <td>   15   </td> </tr>
-  <tr> <td> 4 </td> <td>   20  </td> <td>   31   </td> <td>  22   </td> <td>   16   </td> </tr>
-  <tr> <td> 5 </td> <td>   21  </td> <td>   34   </td> <td>  23   </td> <td>   21   </td> </tr>
-  <tr> <td> 6 </td> <td>    5  </td> <td>   47   </td> <td>   9   </td> <td>   25   </td> </tr>
+  <tr> <td>   </td> <td colspan="2">  Teensy 3.5 </td> <td colspan="2">  Teensy 4.0 </td> <td colspan="2">  Teensy 4.1 </td> </tr>
+  <tr> <td>   </td> <td> DSHOT </td> <td> TLM/RX </td> <td> DSHOT </td> <td> TLM/RX </td> <td> DSHOT </td> <td> TLM/RX </td> </tr>
+  <tr> <td> 1 </td> <td>   22  </td> <td>    0   </td> <td>   4   </td> <td>    0   </td> <td>   4   </td> <td>    0   </td> </tr>
+  <tr> <td> 2 </td> <td>   23  </td> <td>    9   </td> <td>   8   </td> <td>    7   </td> <td>   8   </td> <td>    7   </td> </tr>
+  <tr> <td> 3 </td> <td>    6  </td> <td>    7   </td> <td>  24   </td> <td>   15   </td> <td>   9   </td> <td>   15   </td> </tr>
+  <tr> <td> 4 </td> <td>   20  </td> <td>   31   </td> <td>  22   </td> <td>   16   </td> <td>  22   </td> <td>   16   </td> </tr>
+  <tr> <td> 5 </td> <td>   21  </td> <td>   34   </td> <td>  23   </td> <td>   21   </td> <td>  23   </td> <td>   21   </td> </tr>
+  <tr> <td> 6 </td> <td>    5  </td> <td>   47   </td> <td>   9   </td> <td>   25   </td> <td>  24   </td> <td>   25   </td> </tr>
+  <tr> <td> 6 </td> <td>    -  </td> <td>    -   </td> <td>   -   </td> <td>    -   </td> <td>   2   </td> <td>   28   </td> </tr>
+  <tr> <td> 6 </td> <td>    -  </td> <td>    -   </td> <td>   -   </td> <td>    -   </td> <td>  36   </td> <td>   34   </td> </tr>
 </table>
 
 ## Authors

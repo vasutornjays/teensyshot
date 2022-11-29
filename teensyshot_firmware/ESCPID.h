@@ -3,8 +3,11 @@
  *
  */
 
+#include <stdint.h>
+
 #ifndef __ESCPID_H
 #define __ESCPID_H
+
 
 // Defines
 #define ESCPID_NB_ESC             8                 // Number of ESCs

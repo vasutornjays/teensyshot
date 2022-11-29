@@ -1,7 +1,7 @@
 /*
  *  Communication with ESCPID code running on teensy 3.5
  *   JG, June 2019
- *   To compile : gcc -Wall -o host host.c
+ *   To compile : gcc -Wall -o host_dshot host_dshot.c
  */
 
 #include <fcntl.h>
@@ -23,10 +23,8 @@
 #include <linux/serial.h>
 #include <linux/input.h>
 #endif
-#include "host.h"
+#include "teensyshot/teensyshot_host_lib.h"
 
-// Flags
-#define HOST_STANDALONE                             // main is added
 
 #define HOST_MAX_DEVICES    5                       // Max number of teensys
 
@@ -41,7 +39,7 @@
 //#define HOST_MODEMDEVICE    "/dev/ttyACM0"
 //#define HOST_MODEMDEVICE    "/dev/tty.usbmodem43677001"
 //#define HOST_MODEMDEVICE      "/dev/tty.usbmodem54887501"
-#define HOST_DEV_SERIALNB     4367700              	// Serial number of the teensy
+#define HOST_DEV_SERIALNB     10977220              	// Serial number of the teensy
 //#define HOST_DEV_SERIALNB      54887501
 #define HOST_DEV_SERIALLG     10                    // Max length of a serial number
 
@@ -55,10 +53,10 @@
 
 #define HOST_BAUDRATE       B115200                 // Serial baudrate
 #define HOST_READ_TIMEOUT   5                       // Tenth of second
-#define HOST_NB_PING        1000                    // Nb roundtrip communication
+#define HOST_NB_PING        100000                    // Nb roundtrip communication
 #define HOST_STEP_REF       200                     // Velocity reference step size (10 rpm motor)
 #define HOST_PERIOD         10000                   // Period of serial exchange (us)
-#define HOST_STEP_PERIOD    100                     // Duration of a step (intertions)
+#define HOST_STEP_PERIOD    1                     // Duration of a step (intertions)
 
 // Globals
 int                 Host_fd[HOST_MAX_DEVICES] = 
@@ -171,13 +169,9 @@ int Host_init_port( uint32_t serial_nb )  {
   strncpy( Host_devname[fd_idx], portname, PATH_MAX );
   
   // Initialize corresponding data structure
-  for ( i = 0; i < ESCPID_MAX_ESC; i++ )  {
-    Host_comm[fd_idx].magic =     ESCPID_COMM_MAGIC;
-    Host_comm[fd_idx].RPM_r[i] =  0;
-    Host_comm[fd_idx].PID_P[i] =  ESCPID_PID_P;
-    Host_comm[fd_idx].PID_I[i] =  ESCPID_PID_I;
-    Host_comm[fd_idx].PID_D[i] =  ESCPID_PID_D;
-    Host_comm[fd_idx].PID_f[i] =  ESCPID_PID_F;
+  for ( i = 0; i < NB_MAX_ESC; i++ )  {
+    Host_comm[fd_idx].magic = COMM_MAGIC;
+    Host_comm[fd_idx].dshot[i] = (int16_t)0;
   }
 
   /* Save current port settings */
@@ -230,11 +224,7 @@ void Host_release_port( uint32_t serial_nb )  {
 // Manage communication with the teensy connected to portname
 //
 int Host_comm_update( uint32_t            serial_nb,
-                      int16_t             *RPM_r,
-                      uint16_t            *PID_P,
-                      uint16_t            *PID_I,
-                      uint16_t            *PID_D,
-                      uint16_t            *PID_f,
+                      int16_t             *dshot,
                       ESCPIDcomm_struct_t **comm ) {
                       
   int                 i, ret, res = 0, fd_idx;
@@ -250,12 +240,8 @@ int Host_comm_update( uint32_t            serial_nb,
     return HOST_ERROR_FD;
   
   // Update output data structue
-  for ( i = 0; i < ESCPID_MAX_ESC; i++ )  {
-    Host_comm[fd_idx].RPM_r[i] = RPM_r[i];
-    Host_comm[fd_idx].PID_P[i] = PID_P[i];
-    Host_comm[fd_idx].PID_I[i] = PID_I[i];
-    Host_comm[fd_idx].PID_D[i] = PID_D[i];
-    Host_comm[fd_idx].PID_f[i] = PID_f[i];
+  for ( i = 0; i < NB_MAX_ESC; i++ )  {
+    Host_comm[fd_idx].dshot[i] = dshot[i];
   }
    
   // Send output structure
@@ -314,7 +300,7 @@ int Host_comm_update( uint32_t            serial_nb,
   }
 
   // Check magic number
-  if ( ESCPID_comm[fd_idx].magic !=  ESCPID_COMM_MAGIC )  {
+  if ( ESCPID_comm[fd_idx].magic !=  COMM_MAGIC )  {
     fprintf( stderr, "Invalid magic number.\n" );
     return HOST_ERROR_MAGIC;
   }
@@ -329,77 +315,3 @@ int Host_comm_update( uint32_t            serial_nb,
 
   return 0;
 }
-
-#ifdef HOST_STANDALONE
-//
-//  main
-//
-int main( int argc, char *argv[] )  {
-
-  int                 i, k, ret;
-  int16_t             RPM_r[ESCPID_MAX_ESC];
-  uint16_t            PID_P[ESCPID_MAX_ESC];
-  uint16_t            PID_I[ESCPID_MAX_ESC];
-  uint16_t            PID_D[ESCPID_MAX_ESC];
-  uint16_t            PID_f[ESCPID_MAX_ESC];
-  ESCPIDcomm_struct_t *comm;
-  
-  // Initialize tunable PID data
-  for ( i = 0; i < ESCPID_MAX_ESC; i++ )  {
-    RPM_r[i] = HOST_STEP_REF;
-    PID_P[i] = ESCPID_PID_P;
-    PID_I[i] = ESCPID_PID_I;
-    PID_D[i] = ESCPID_PID_D;
-    PID_f[i] = ESCPID_PID_F;
-  }
-  
-  // Initialize serial port
-  if ( Host_init_port( HOST_DEV_SERIALNB ) )  {
-    fprintf( stderr, "Error initializing serial port.\n" );
-    exit( -1 );
-  }
-
-  // Testing roundtrip serial link duration
-  for ( i = 0; i < HOST_NB_PING; i++ )  {
-  
-    // Serial exchange with teensy
-    if ( ( ret = Host_comm_update(  HOST_DEV_SERIALNB,
-                                    RPM_r,
-                                    PID_P,
-                                    PID_I,
-                                    PID_D,
-                                    PID_f,
-                                    &comm ) ) )  {
-      fprintf( stderr, "Error %d in Host_comm_update.\n", ret );
-      break;
-    }
-    
-    // Display telemetry
-    for ( k = 0; k < ESCPID_NB_ESC; k++ )
-      fprintf(  stderr,
-                "#:%d.%d\terr:%d\tdeg:%d\tcmd:%d\tmV:%d\tmA:%d\trpm_r:%d\trpm:%d\n",
-                i,
-                k,
-                comm->err[k],
-                comm->deg[k],
-                comm->cmd[k],
-                comm->volt[k] * 10,
-                comm->amp[k] * 10,
-                RPM_r[k] * 10,
-                comm->rpm[k] * 10 );
-    
-    // Update reference
-    if ( !( i % HOST_STEP_PERIOD ) )
-      for ( k = 0; k < ESCPID_MAX_ESC; k++ )
-        RPM_r[k] *= -1;
-              
-    // Wait loop period
-    usleep( HOST_PERIOD );
-  }
-
-  // Restoring serial port initial configuration
-  Host_release_port( HOST_DEV_SERIALNB );
-
-  return 0;
-}
-#endif

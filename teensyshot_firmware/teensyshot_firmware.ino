@@ -10,7 +10,7 @@
 #include <Arduino.h>
 #include "DSHOT.h"
 #include "ESCCMD.h"
-#include "ESCPID.h"
+#include "teensyshot_firmware.h"
 
 // Globals
 // float     g_dshot_val[ESCPID_NB_ESC] = {};
@@ -18,7 +18,6 @@ uint16_t  g_host_comm_wd = 0;
 
 int16_t   g_dshot_val[ESCPID_NB_ESC] = {};
 
-bool loop_state_led = 1;
 
 ESCPIDcomm_struct_t g_esc_pid_comm = {
                                   ESCPID_COMM_MAGIC,
@@ -117,19 +116,13 @@ void setup() {
     // Reference watchdog is initially triggered
     g_host_comm_wd = ESCPID_COMM_WD_LEVEL;
 
-    
-    pinMode(13, OUTPUT);
-    pinMode(14, OUTPUT);
-    pinMode(17, OUTPUT);
 }
 
 void loop(){
 
     static int i, ret;
-    digitalWrite(13, HIGH);
     // Check for next timer event and tic
     ret = ESCCMD_tic();
-    digitalWrite(13, LOW);
     // Bidirectional serial exchange with host
     host_comm_update();
 
