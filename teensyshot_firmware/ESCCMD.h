@@ -11,11 +11,7 @@
 // Defines
 #define ESCCMD_MAX_ESC          DSHOT_MAX_OUTPUTS // Max number of ESCs
 
-#if(defined(__IMXRT1062__) && defined(ARDUINO_TEENSY41)) // teensy 4.1
-  #define ESCCMD_NB_UART          8                 // Number of UARTS available
-#else
-  #define ESCCMD_NB_UART          6                 // Number of UARTS available
-#endif
+#define ESCCMD_NB_UART          8                 // Number of UARTS available
 
 #if ESCCMD_NB_UART < ESCCMD_MAX_ESC
   #error ESCCMD_NB_UART should be >= ESCCMD_MAX_ESC

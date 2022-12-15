@@ -9,11 +9,8 @@
 // Defines
 #define DSHOT_NB_DMA_CHAN         8             // Number of accessible DMA channels
 
-#if ( defined(__IMXRT1062__) && defined(ARDUINO_TEENSY41) )
-   #define DSHOT_MAX_OUTPUTS         8             // Maximum number of DSHOT outputs on teensy 4.1
- #else
-   #define DSHOT_MAX_OUTPUTS         6             // Maximum number of DSHOT outputs on teensy 3.5 and 4.0
- #endif
+
+#define DSHOT_MAX_OUTPUTS         8             // Maximum number of DSHOT outputs on teensy 4.1
 
 #if DSHOT_NB_DMA_CHAN < DSHOT_MAX_OUTPUTS
   #error ESCCMD_NB_UART should be >= DSHOT_MAX_OUTPUTS

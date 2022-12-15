@@ -47,7 +47,6 @@ volatile uint8_t    ESCCMD_timer_flag = 0;                  // Periodic loop ena
 
 IntervalTimer       ESCCMD_timer;                           // Timer object
 
-#if(defined(__IMXRT1062__) && defined(ARDUINO_TEENSY41)) // teensy 4.1
 HardwareSerial*     ESCCMD_serial[ESCCMD_NB_UART] = {       // Array of Serial objects
                                                 &Serial1,
                                                 &Serial2,
@@ -57,17 +56,7 @@ HardwareSerial*     ESCCMD_serial[ESCCMD_NB_UART] = {       // Array of Serial o
                                                 &Serial6,
                                                 &Serial7,
                                                 &Serial8 };
-#else
 
-HardwareSerial*     ESCCMD_serial[ESCCMD_NB_UART] = {       // Array of Serial objects
-                                                &Serial1,
-                                                &Serial2,
-                                                &Serial3,
-                                                &Serial4,
-                                                &Serial5,
-                                                &Serial6 };
-
-#endif
 uint8_t             ESCCMD_bufferTlm[ESCCMD_NB_UART][ESCCMD_TLM_LENGTH];
 
 #ifdef ESCCMD_ESC_EMULATION
