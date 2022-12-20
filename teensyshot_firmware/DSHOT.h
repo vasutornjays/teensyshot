@@ -15,7 +15,7 @@
 #if DSHOT_NB_DMA_CHAN < DSHOT_MAX_OUTPUTS
   #error ESCCMD_NB_UART should be >= DSHOT_MAX_OUTPUTS
 #endif
-#define DSHOT_DMA_MARGIN          2                                    // Number of additional bit duration to wait until checking if DMA is over
+#define DSHOT_DMA_MARGIN          100                                    // Number of additional bit duration to wait until checking if DMA is over
 #define DSHOT_DSHOT_LENGTH        16                                      // Number of bits in a DSHOT sequence
 #define DSHOT_DMA_LENGTH          DSHOT_DMA_MARGIN + DSHOT_DSHOT_LENGTH   // Number of steps of one DMA sequence (the two last values are zero)
 #define DSHOT_BT_DURATION         1670          // Duration of 1 DSHOT600 bit in ns
