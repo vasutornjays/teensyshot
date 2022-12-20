@@ -10,7 +10,7 @@
 
 
 extern "C" {
-  // Get declaration for f(int i, char c, float x)
+  // Get declaration
 #include "teensyshot/teensyshot_host_lib.h"
 }
 
@@ -38,11 +38,9 @@ public:
 
     rclcpp::on_shutdown(std::bind(&TeensyshotNode::shutdown, this));
 
-    dshot_subscription_ = this->create_subscription<teensyshot_interfaces::msg::DshotCommand>(
-      "/teensyshot/dshot_cmd", 10, std::bind(&TeensyshotNode::dshot_callback, this, std::placeholders::_1));
-
+    dshot_subscription_ = this->create_subscription<teensyshot_interfaces::msg::DshotCommand>("/teensyshot/dshot_cmd", 10, std::bind(&TeensyshotNode::dshot_callback, this, std::placeholders::_1));
     telemetry_publisher_ = this->create_publisher<teensyshot_interfaces::msg::KissTelemetry>("/teensyshot/telemetry", 10);
-    std::chrono::milliseconds timer_period(50U);
+    std::chrono::milliseconds timer_period(100U);
     timer_ = this->create_wall_timer(timer_period, std::bind(&TeensyshotNode::timer_callback, this));
   }
 
@@ -54,28 +52,30 @@ private:
 
   void dshot_callback(const teensyshot_interfaces::msg::DshotCommand::SharedPtr msg)
   {
+    int ret;
+    int16_t dshot_val[8];
     for(int i; i < 8; i++)
     {
-      this->dshot[i] = msg->dshot[i];
-      // std::cout << "test";
-      RCLCPP_INFO(this->get_logger(), "Dshot ch: '%d => '%d'", i, msg->dshot[i]);   
+      // this->dshot[i] = msg->dshot[i];
+      dshot_val[i] = msg->dshot[i];
+      RCLCPP_INFO(this->get_logger(), "Dshot ch: '%d => '%d'", i, msg->dshot[i]);
+    }
+
+      if ( ( ret = Host_comm_update(  HOST_DEV_SERIALNB, dshot_val, &comm ) ) )  {
+      fprintf( stderr, "Error %d in Host_comm_update.\n", ret );
     }
   }
 
   void timer_callback()
   {
     int ret;
-    // auto telemetry_msg = teensyshot_interfaces::msg::KissTelemetry();
 
     // Serial exchange with teensy
-    if ( ( ret = Host_comm_update(  HOST_DEV_SERIALNB,
-                                    dshot,
-                                    &comm ) ) )  {
-      fprintf( stderr, "Error %d in Host_comm_update.\n", ret );
-      // break;
-    }
 
-    // telemetry_msg.header.stamp = this->get_clock()->now();
+
+    // auto msg = teensyshot_interfaces::msg::KissTelemetry();
+    // msg.header.stamp.sec = this->get_clock()->now().seconds();
+    // msg.header.stamp.nanosec = this->get_clock()->now().nanoseconds();
     
     // Display telemetry
     for (int k = 0; k < NB_ESC; k++ ){
@@ -90,15 +90,15 @@ private:
                 dshot[k],
                 comm->rpm[k] * 10 );
       
-      // telemetry_msg.error[k] = comm->err[k];
-      // telemetry_msg.temperature[k] = comm->deg[k];
-      // telemetry_msg.dshot_command[k] = comm->cmd[k];
-      // telemetry_msg.volt[k] = comm->volt[k];
-      // telemetry_msg.current[k] = comm->amp[k];
-      // telemetry_msg.rpm[k] = comm->rpm[k];
+      // msg.error[k] = comm->err[k];
+      // msg.temperature[k] = comm->deg[k];
+      // msg.dshot_command[k] = comm->cmd[k];
+      // msg.volt[k] = comm->volt[k];
+      // msg.current[k] = comm->amp[k];
+      // msg.rpm[k] = comm->rpm[k];
     }
     
-    // telemetry_publisher_->publish(telemetry_msg);
+    // telemetry_publisher_->publish(msg);
 
   }
   rclcpp::TimerBase::SharedPtr timer_;
