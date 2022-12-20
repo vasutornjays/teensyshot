@@ -57,8 +57,8 @@ private:
     for(int i; i < 8; i++)
     {
       this->dshot[i] = msg->dshot[i];
-      std::cout << "test";
-      // RCLCPP_INFO(this->get_logger(), "Dshot ch: '%d => '%d'", i, msg->dshot[i]);   
+      // std::cout << "test";
+      RCLCPP_INFO(this->get_logger(), "Dshot ch: '%d => '%d'", i, msg->dshot[i]);   
     }
   }
 
@@ -90,15 +90,15 @@ private:
                 dshot[k],
                 comm->rpm[k] * 10 );
       
-      telemetry_msg.error[k] = comm->err[k];
-      telemetry_msg.temperature[k] = comm->deg[k];
-      telemetry_msg.dshot_command[k] = comm->cmd[k];
-      telemetry_msg.volt[k] = comm->volt[k];
-      telemetry_msg.current[k] = comm->amp[k];
-      telemetry_msg.rpm[k] = comm->rpm[k];
+      // telemetry_msg.error[k] = comm->err[k];
+      // telemetry_msg.temperature[k] = comm->deg[k];
+      // telemetry_msg.dshot_command[k] = comm->cmd[k];
+      // telemetry_msg.volt[k] = comm->volt[k];
+      // telemetry_msg.current[k] = comm->amp[k];
+      // telemetry_msg.rpm[k] = comm->rpm[k];
     }
     
-    telemetry_publisher_->publish(telemetry_msg);
+    // telemetry_publisher_->publish(telemetry_msg);
 
   }
   rclcpp::TimerBase::SharedPtr timer_;
