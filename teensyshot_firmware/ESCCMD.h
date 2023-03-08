@@ -29,6 +29,7 @@
 #define ESCCMD_TIMER_PERIOD     2500              // Periodic loop period (us) => 0.01 sec or 100Hz for mainloop time 
 #define ESCCMD_ESC_WATCHDOG     250000            // ESC arming watchdog timer (us)
 #define ESCCMD_TIMER_MAX_MISS   ( ESCCMD_ESC_WATCHDOG / ESCCMD_TIMER_PERIOD )
+#define ESCCMD_TLM_REQ_FREQ     10                // Number of periods without telemetry request 
                                                   // Maximum missed tics before watchdog is triggered
 #define ESCCMD_THWD_LEVEL       20                // Maximum number of periods without throttle refresh
 
