@@ -44,63 +44,63 @@ const uint16_t DSHOT_bit_length = uint64_t(F_TMR) * DSHOT_BT_DURATION / 10000000
 uint8_t DSHOT_n;
 
 // DMA eFlexPWM modules
-volatile IMXRT_FLEXPWM_t *DSHOT_mods[DSHOT_NB_DMA_CHAN] = {&IMXRT_FLEXPWM2,
+volatile IMXRT_FLEXPWM_t *DSHOT_mods[DSHOT_NB_DMA_CHAN] = {&IMXRT_FLEXPWM4,
+                                                           &IMXRT_FLEXPWM2,
                                                            &IMXRT_FLEXPWM1,
                                                            &IMXRT_FLEXPWM2,
                                                            &IMXRT_FLEXPWM4,
                                                            &IMXRT_FLEXPWM4,
                                                            &IMXRT_FLEXPWM1,
-                                                           &IMXRT_FLEXPWM4,
                                                            &IMXRT_FLEXPWM2};
 
 // DMA eFlexPWM submodules
-volatile uint8_t DSHOT_sm[DSHOT_NB_DMA_CHAN] = {0,
+volatile uint8_t DSHOT_sm[DSHOT_NB_DMA_CHAN] = {2,
+                                                0,
                                                 3,
                                                 2,
                                                 0,
                                                 1,
-                                                2,
                                                 2,
                                                 3};
 
 // DMA eFlexPWM submodule PWM channel selector: A=0, B=1, X=2
 volatile uint8_t DSHOT_abx[DSHOT_NB_DMA_CHAN] = {0,
                                                  0,
+                                                 0,
                                                  1,
                                                  0,
                                                  0,
                                                  2,
-                                                 0,
                                                  0};
 
 // Output pins
-volatile uint8_t DSHOT_pin[DSHOT_NB_DMA_CHAN] = {4,
+volatile uint8_t DSHOT_pin[DSHOT_NB_DMA_CHAN] = {2,
+                                                 4,
                                                  8,
                                                  9,
                                                  22,
                                                  23,
                                                  24,
-                                                 2,
                                                  36};
 
 // Output pin ALT mux
 volatile uint8_t DSHOT_pinmux[DSHOT_NB_DMA_CHAN] = {1,
+                                                    1,
                                                     6,
                                                     2,
                                                     1,
                                                     1,
                                                     4,
-                                                    1,
                                                     6};
 
 // DMA source
-volatile uint8_t DSHOT_dmamux[DSHOT_NB_DMA_CHAN] = {DMAMUX_SOURCE_FLEXPWM2_WRITE0,
+volatile uint8_t DSHOT_dmamux[DSHOT_NB_DMA_CHAN] = {DMAMUX_SOURCE_FLEXPWM4_WRITE2,
+                                                    DMAMUX_SOURCE_FLEXPWM2_WRITE0,
                                                     DMAMUX_SOURCE_FLEXPWM1_WRITE3,
                                                     DMAMUX_SOURCE_FLEXPWM2_WRITE2,
                                                     DMAMUX_SOURCE_FLEXPWM4_WRITE0,
                                                     DMAMUX_SOURCE_FLEXPWM4_WRITE1,
                                                     DMAMUX_SOURCE_FLEXPWM1_WRITE2,
-                                                    DMAMUX_SOURCE_FLEXPWM4_WRITE2,
                                                     DMAMUX_SOURCE_FLEXPWM2_WRITE3};
 
 

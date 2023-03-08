@@ -44,7 +44,7 @@ typedef struct {
 
 #define HOST_MAX_DEVICES    5                       // Max number of teensys
 
-#define HOST_DEV_SERIALNB     10977220              	// Serial number of the teensy
+#define HOST_DEV_SERIALNB     12482610              	// Serial number of the teensy
 //#define HOST_DEV_SERIALNB      54887501
 #define HOST_DEV_SERIALLG     10                    // Max length of a serial number
 
