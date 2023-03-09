@@ -24,7 +24,6 @@ public:
     TeensyshotNode()
         : Node("teensyshot_node")
     {
-
         for (int k = 0; k < NB_MAX_ESC; k++)
         {
             dshot[k] = 0;
@@ -54,18 +53,27 @@ private:
 
     void dshot_callback(const teensyshot_interfaces::msg::DshotCommand::SharedPtr msg)
     {
+        dshot_cmd_timestamp = this->get_clock()->now().seconds();
+        
         for (int i = 0; i < 8; i++)
         {
             this->dshot[i] = msg->dshot[i];
-            RCLCPP_INFO(this->get_logger(), "Dshot ch: '%d => '%d'", i, msg->dshot[i]);
+            // RCLCPP_INFO(this->get_logger(), "Dshot ch: '%d => '%d'", i, msg->dshot[i]);
         }
     }
 
     void timer_callback()
     {
         int ret;
-
-        RCLCPP_INFO_STREAM(this->get_logger(), "Timer trick");
+        rclcpp::Time t = this->get_clock()->now();
+        auto& clk = *this->get_clock();
+        if (t.seconds() - dshot_cmd_timestamp < dshot_cmd_timeout){
+            for (int i = 0; i < 8; i++)
+            {
+                this->dshot[i] = 0;
+                RCLCPP_WARN_THROTTLE(this->get_logger(), clk, 500, ">>>>> TIMEOUT STOP THRUSTER <<<<<");
+            }
+        }
 
         // Serial exchange with teensy
         if ((ret = Host_comm_update(HOST_DEV_SERIALNB, dshot, &comm)))
@@ -74,9 +82,8 @@ private:
         }
         else
         {
+            msg.header.stamp = t;
             auto msg = teensyshot_interfaces::msg::KissTelemetry();
-            msg.header.stamp.sec = this->get_clock()->now().seconds();
-            msg.header.stamp.nanosec = this->get_clock()->now().nanoseconds();
 
             // Display telemetry
             for (int k = 0; k < NB_ESC; k++)
@@ -111,6 +118,8 @@ private:
     int16_t dshot[8];
     ESCPIDcomm_struct_t *comm;
     int dshot_state = 1;
+    double dshot_cmd_timestamp;
+    doubel dshot_cmd_timeout = 0.5;
 };
 
 int main(int argc, char *argv[])
