@@ -38,8 +38,8 @@ public:
 
         rclcpp::on_shutdown(std::bind(&TeensyshotNode::shutdown, this));
 
-        dshot_subscription_ = this->create_subscription<teensyshot_interfaces::msg::DshotCommand>("/teensyshot/dshot_cmd", 10, std::bind(&TeensyshotNode::dshot_callback, this, std::placeholders::_1));
-        telemetry_publisher_ = this->create_publisher<teensyshot_interfaces::msg::KissTelemetry>("/teensyshot/telemetry", 10);
+        dshot_subscription_ = this->create_subscription<teensyshot_interfaces::msg::DshotCommand>("thrusters/dshot_cmd", 10, std::bind(&TeensyshotNode::dshot_callback, this, std::placeholders::_1));
+        telemetry_publisher_ = this->create_publisher<teensyshot_interfaces::msg::KissTelemetry>("thrusters/telemetry", 10);
         std::chrono::milliseconds timer_period(50U);
         timer_ = this->create_wall_timer(timer_period, std::bind(&TeensyshotNode::timer_callback, this));
     }
@@ -58,7 +58,7 @@ private:
         for (int i = 0; i < 8; i++)
         {
             this->dshot[i] = msg->dshot[i];
-            // RCLCPP_INFO(this->get_logger(), "Dshot ch: '%d => '%d'", i, msg->dshot[i]);
+            RCLCPP_INFO(this->get_logger(), "Dshot ch: '%d => '%d'", i, msg->dshot[i]);
         }
     }
 
@@ -67,7 +67,7 @@ private:
         int ret;
         rclcpp::Time t = this->get_clock()->now();
         auto& clk = *this->get_clock();
-        if (t.seconds() - dshot_cmd_timestamp < dshot_cmd_timeout){
+        if (t.seconds() - dshot_cmd_timestamp > dshot_cmd_timeout){
             for (int i = 0; i < 8; i++)
             {
                 this->dshot[i] = 0;
@@ -82,22 +82,24 @@ private:
         }
         else
         {
-            msg.header.stamp = t;
             auto msg = teensyshot_interfaces::msg::KissTelemetry();
+            msg.header.stamp = t;
 
             // Display telemetry
             for (int k = 0; k < NB_ESC; k++)
             {
                 RCLCPP_INFO(this->get_logger(),
-                            "#:%d\terr:%d\tdeg:%d\tcmd:%d\tmV:%d\tmA:%d\trpm_r:%d\trpm:%d",
+                            "#:%d\terr:%d\tdeg:%d\tcmd:%d\tmV:%d\tmA:%d\trpm_r:%d\trpm:%f",
                             k,
                             comm->err[k],
                             comm->deg[k],
                             comm->cmd[k],
-                            comm->volt[k] * 10,
-                            comm->amp[k] * 10,
+                            comm->volt[k],
+                            comm->amp[k],
                             dshot[k],
-                            comm->rpm[k] * 10);
+                            comm->rpm[k]);
+                //  T200 Thruster have 14 poles then
+                //  Electrical Rpm /100 so 100 are 10000 Erpm
                 
                 if(comm->err[k] == 0){
                     msg.error[k] = comm->err[k];
@@ -119,7 +121,7 @@ private:
     ESCPIDcomm_struct_t *comm;
     int dshot_state = 1;
     double dshot_cmd_timestamp;
-    doubel dshot_cmd_timeout = 0.5;
+    double dshot_cmd_timeout = 0.5;
 };
 
 int main(int argc, char *argv[])
