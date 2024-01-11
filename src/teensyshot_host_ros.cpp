@@ -38,8 +38,10 @@ public:
 
         rclcpp::on_shutdown(std::bind(&TeensyshotNode::shutdown, this));
 
-        dshot_subscription_ = this->create_subscription<teensyshot_interfaces::msg::DshotCommand>("thrusters/dshot_cmd", 10, std::bind(&TeensyshotNode::dshot_callback, this, std::placeholders::_1));
-        telemetry_publisher_ = this->create_publisher<teensyshot_interfaces::msg::KissTelemetry>("thrusters/telemetry", 10);
+        auto sensors_qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
+
+        dshot_subscription_ = this->create_subscription<teensyshot_interfaces::msg::DshotCommand>("thrusters/dshot_cmd", sensors_qos, std::bind(&TeensyshotNode::dshot_callback, this, std::placeholders::_1));
+        telemetry_publisher_ = this->create_publisher<teensyshot_interfaces::msg::KissTelemetry>("thrusters/telemetry", sensors_qos);
         std::chrono::milliseconds timer_period(50U);
         timer_ = this->create_wall_timer(timer_period, std::bind(&TeensyshotNode::timer_callback, this));
     }
@@ -58,7 +60,7 @@ private:
         for (int i = 0; i < 8; i++)
         {
             this->dshot[i] = msg->dshot[i];
-            RCLCPP_INFO(this->get_logger(), "Dshot ch: '%d => '%d'", i, msg->dshot[i]);
+            // RCLCPP_INFO(this->get_logger(), "Dshot ch: '%d => '%d'", i, msg->dshot[i]);
         }
     }
 
@@ -88,7 +90,7 @@ private:
             // Display telemetry
             for (int k = 0; k < NB_ESC; k++)
             {
-                RCLCPP_INFO(this->get_logger(),
+                RCLCPP_DEBUG(this->get_logger(),
                             "#:%d\terr:%d\tdeg:%d\tcmd:%d\tmV:%d\tmA:%d\trpm_r:%d\trpm:%f",
                             k,
                             comm->err[k],
@@ -98,6 +100,7 @@ private:
                             comm->amp[k],
                             dshot[k],
                             comm->rpm[k]);
+   
                 //  T200 Thruster have 14 poles then
                 //  Electrical Rpm /100 so 100 are 10000 Erpm
                 
@@ -110,6 +113,8 @@ private:
                     msg.rpm[k] = comm->rpm[k];
                 }
             }
+
+            RCLCPP_INFO(this->get_logger(),"%d\tmV",comm->volt[0]);
 
             telemetry_publisher_->publish(msg);
         }
